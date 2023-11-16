@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import MuiDrawer from '@mui/material/Drawer'
@@ -8,16 +7,18 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
-import Badge from '@mui/material/Badge'
 import MenuIcon from '@mui/icons-material/Menu'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
 import BarChartIcon from '@mui/icons-material/BarChart'
 
-import NotificationsIcon from '@mui/icons-material/Notifications'
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { User, onAuthStateChanged, signOut } from 'firebase/auth'
+import { auth } from '../../firebase'
+import { LogoutRounded } from '@mui/icons-material'
 
 const SIDE_MENUS = [
   { text: '대쉬보드', icon: () => <DashboardIcon />, path: '/' },
@@ -79,7 +80,23 @@ const defaultTheme = createTheme()
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
-  const [open, setOpen] = React.useState(true)
+  const [user, setUser] = useState<User | null>(null)
+  const [open, setOpen] = useState(true)
+
+  useEffect(() => {
+    const listen = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user)
+      } else {
+        setUser(null)
+        navigate('/login')
+      }
+    })
+    return () => {
+      listen()
+    }
+  }, [])
+
   const toggleDrawer = () => {
     setOpen(!open)
   }
@@ -89,7 +106,9 @@ export default function Layout() {
   }
 
   const onLogout = () => {
-    navigate('/login')
+    signOut(auth).then(() => {
+      navigate('/login')
+    })
   }
 
   return (
@@ -118,9 +137,10 @@ export default function Layout() {
               러닝메이트
             </Typography>
             <IconButton color="inherit" onClick={onLogout}>
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
+              {/* <Badge badgeContent={4} color="secondary"> */}
+              {/* <NotificationsIcon /> */}
+              {/* </Badge> */}
+              <LogoutRounded />
             </IconButton>
           </Toolbar>
         </AppBar>
@@ -154,6 +174,7 @@ export default function Layout() {
         </Drawer>
         <Box
           component="main"
+          style={{ padding: '10px' }}
           sx={{
             backgroundColor: (theme) => (theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900]),
             flexGrow: 1,
@@ -162,6 +183,7 @@ export default function Layout() {
           }}
         >
           <Toolbar />
+
           <Outlet />
         </Box>
       </Box>
