@@ -9,9 +9,24 @@ import { db } from '../firebase'
 import { QueryDocumentSnapshot, collection, getCountFromServer, getDocs, limit, orderBy, query, startAfter } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import Meeting from '../models/meeting'
-import { Box, Button, CircularProgress, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Divider, Modal, Typography } from '@mui/material'
 import { MEETING_PER_PAGE, StyledTableCell } from '../utils/constants'
 import { ArrowDownward } from '@mui/icons-material'
+import AlertDialog from '../components/global/alertDialog'
+import CustomizedSnackbars from '../components/global/snackbar'
+
+const style = {
+  position: 'absolute' as 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  maxHeight: 400,
+  width: 600,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+}
 
 interface IPageInfo {
   totalCount: number
@@ -20,8 +35,13 @@ interface IPageInfo {
 }
 
 export default function MeetingsPage() {
+  const [selectedMeet, setSelectedMeet] = useState<Meeting | null>(null)
+  const [detailOpen, setDetailOpen] = useState({
+    detail: false,
+    deleteConfirm: false,
+    snackbar: false,
+  })
   const [loading, setLoading] = useState(false)
-
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [pageInfo, setPageInfo] = useState<IPageInfo>({
     totalCount: 0,
@@ -45,7 +65,6 @@ export default function MeetingsPage() {
       setPageInfo((prev) => ({ ...prev, totalCount: snapshot.data().count, curPage: prev.curPage + 1 }))
     } else {
       totalCnt = pageInfo.totalCount
-      console.log('pageInfo.curPage', pageInfo.curPage)
     }
 
     let doc
@@ -78,6 +97,28 @@ export default function MeetingsPage() {
   const onNextData = () => {
     fetchMeetings()
   }
+
+  const onCloseModel = () => {
+    setDetailOpen((prev) => ({ ...prev, detail: false }))
+  }
+  const openDetailModal = (meet: Meeting) => {
+    setDetailOpen((prev) => ({ ...prev, detail: true }))
+    setSelectedMeet(meet)
+  }
+
+  const onDeleteConfirmModalShow = () => {
+    setDetailOpen((prev) => ({ ...prev, deleteConfirm: true }))
+  }
+  const onDeleteConfirmModalClose = () => {
+    setDetailOpen((prev) => ({ ...prev, deleteConfirm: false }))
+  }
+
+  const onToggleMeetStatus = async () => {
+    // TODO 모임 상태값 변경하기
+    // await setDoc(doc(db, 'cities', selectedMeet!.id), { ...selectedMeet, status: 'stop' })
+    onDeleteConfirmModalClose()
+    setDetailOpen((prev) => ({ ...prev, snackbar: true }))
+  }
   return (
     <>
       {loading && pageInfo.curPage === 1 ? (
@@ -92,16 +133,18 @@ export default function MeetingsPage() {
                 <TableRow>
                   <StyledTableCell>제목</StyledTableCell>
                   <StyledTableCell>장소</StyledTableCell>
+                  <StyledTableCell>상태</StyledTableCell>
                   <StyledTableCell>생성일자</StyledTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {meetings.map((meet) => (
-                  <TableRow hover key={meet.id} sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}>
+                  <TableRow onClick={() => openDetailModal(meet)} hover key={meet.id} sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}>
                     <TableCell component="th" scope="row">
                       {meet.title}
                     </TableCell>
                     <TableCell>{meet.location}</TableCell>
+                    <TableCell>정상</TableCell>
                     <TableCell>{meet.createdAt.toISOString().split('T')[0]}</TableCell>
                   </TableRow>
                 ))}
@@ -118,6 +161,50 @@ export default function MeetingsPage() {
           ) : null}
         </Box>
       )}
+
+      <Modal open={detailOpen.detail} onClose={onCloseModel} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+        <Box sx={{ ...style, overflowY: 'scroll' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              상세정보
+            </Typography>
+            <Button onClick={onDeleteConfirmModalShow} variant="contained" color="error" size="small">
+              정지
+            </Button>
+          </Box>
+          <Divider sx={{ mt: 1, bgcolor: 'black' }} />
+          <Box>
+            <Typography variant="body1" id="modal-modal-description" sx={{ mt: 2, fontWeight: 'bold' }}>
+              제목
+            </Typography>
+            <Typography variant="body2" id="modal-modal-description" sx={{ mt: 1 }}>
+              {selectedMeet?.title}
+            </Typography>
+          </Box>
+          <Box>
+            <Typography variant="body1" id="modal-modal-description" sx={{ mt: 2, fontWeight: 'bold' }}>
+              상세내용
+            </Typography>
+            <Typography variant="body2" id="modal-modal-description" sx={{ mt: 1 }}>
+              {selectedMeet?.desc}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: 'flex', justifyContent: 'end', mt: 4 }}>
+            <Button onClick={onCloseModel} variant="contained" size="small">
+              닫기
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      <AlertDialog alertType="meetingDelete" open={detailOpen.deleteConfirm} cancelCbFn={onDeleteConfirmModalClose} confirmCbFn={onToggleMeetStatus} />
+      <CustomizedSnackbars
+        alertType="meetingDelete"
+        open={detailOpen.snackbar}
+        handleClose={() => {
+          setDetailOpen((prev) => ({ ...prev, snackbar: false }))
+        }}
+      />
     </>
   )
 }

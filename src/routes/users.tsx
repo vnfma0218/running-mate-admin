@@ -10,7 +10,7 @@ import { db } from '../firebase'
 import { collection, getDocs } from 'firebase/firestore'
 import User from '../models/user'
 import { StyledTableCell } from '../utils/constants'
-import { Box, CircularProgress } from '@mui/material'
+import { Box, Button, CircularProgress, Typography } from '@mui/material'
 
 export default function UsersPage() {
   const [loading, setLoading] = useState(false)
@@ -32,6 +32,7 @@ export default function UsersPage() {
     setUsers(users)
     setLoading(false)
   }
+
   return (
     <>
       {loading ? (
@@ -45,6 +46,9 @@ export default function UsersPage() {
               <TableRow>
                 <StyledTableCell>닉네임</StyledTableCell>
                 <StyledTableCell>이메일</StyledTableCell>
+                <StyledTableCell align="left">
+                  <Typography sx={{ paddingLeft: '5px' }}> 관리</Typography>
+                </StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -54,6 +58,14 @@ export default function UsersPage() {
                     {user.name}
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Button size="small" variant="contained" color="error">
+                      정지
+                    </Button>
+                    {/* <Button sx={{ ml: 1 }} size="small" variant="contained" color="error">
+                      삭제
+                    </Button> */}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
