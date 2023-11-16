@@ -11,6 +11,7 @@ import Layout from './components/global/layout'
 import UsersPage from './routes/users'
 import HomePage from './routes/home'
 import NotiePage from './routes/notice'
+import MeetingsPage from './routes/meetings'
 
 const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/users', element: <UsersPage /> },
+      { path: '/meetings', element: <MeetingsPage /> },
       { path: '/notice', element: <NotiePage /> },
     ],
   },

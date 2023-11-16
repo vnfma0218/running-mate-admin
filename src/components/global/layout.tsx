@@ -18,13 +18,45 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { User, onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../../firebase'
-import { LogoutRounded } from '@mui/icons-material'
+import { LocationCity, LogoutRounded, MeetingRoom, NoMeetingRoom, People } from '@mui/icons-material'
 
-const SIDE_MENUS = [
-  { text: '대쉬보드', icon: () => <DashboardIcon />, path: '/' },
-  { text: '회원관리', icon: () => <PeopleIcon />, path: '/users' },
-  { text: '공지관리', icon: () => <PeopleIcon />, path: '/notice' },
-  { text: '통계', icon: () => <BarChartIcon />, path: '/report' },
+interface ISideMenu {
+  text: string
+  path: string
+  icon: () => JSX.Element
+  title: () => JSX.Element
+  desc: () => JSX.Element
+}
+
+const SIDE_MENUS: ISideMenu[] = [
+  {
+    text: '대쉬보드',
+    icon: () => <DashboardIcon />,
+    path: '/',
+    title: () => <Typography sx={{ mt: 2 }}>대쉬보드</Typography>,
+    desc: () => <Typography></Typography>,
+  },
+  {
+    text: '회원관리',
+    icon: () => <PeopleIcon />,
+    path: '/users',
+    title: () => <Typography sx={{ mt: 2 }}>회원관리</Typography>,
+    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 회원을 관리합니다.</Typography>,
+  },
+  {
+    text: '모임관리',
+    icon: () => <LocationCity />,
+    path: '/meetings',
+    title: () => <Typography sx={{ mt: 2 }}>모임관리</Typography>,
+    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 모임을 관리합니다.</Typography>,
+  },
+  {
+    text: '공지관리',
+    icon: () => <PeopleIcon />,
+    path: '/notice',
+    title: () => <Typography sx={{ mt: 2 }}>회원관리</Typography>,
+    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 회원을 관리합니다.</Typography>,
+  },
 ]
 
 const drawerWidth: number = 240
@@ -80,6 +112,7 @@ const defaultTheme = createTheme()
 export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [curMenu, setCurMenu] = useState<ISideMenu | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(true)
 
@@ -96,6 +129,12 @@ export default function Layout() {
       listen()
     }
   }, [])
+
+  useEffect(() => {
+    const currentMenu = SIDE_MENUS.find((menu) => menu.path === location.pathname)
+
+    setCurMenu(currentMenu ? currentMenu : null)
+  }, [location.pathname])
 
   const toggleDrawer = () => {
     setOpen(!open)
@@ -160,7 +199,7 @@ export default function Layout() {
           <Divider />
           <List component="nav">
             {SIDE_MENUS.map((menu) => {
-              console.log('location.pathname: ', location.pathname)
+              // console.log('location.pathname: ', location.pathname)
               const isActive = menu.path === location.pathname
               return (
                 <ListItemButton key={menu.path} onClick={() => selectMenu(menu.path)}>
@@ -183,6 +222,10 @@ export default function Layout() {
           }}
         >
           <Toolbar />
+          {curMenu ? curMenu.title() : null}
+          {curMenu ? curMenu.desc() : null}
+          {/* <Typography sx={{ mt: 2 }}>회원관리</Typography>
+          <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 회원을 관리합니다.</Typography> */}
 
           <Outlet />
         </Box>

@@ -10,7 +10,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import { useNavigate } from 'react-router-dom'
-import { AuthErrorCodes, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
+import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '../firebase.ts'
 import { useEffect, useState } from 'react'
 
@@ -112,18 +112,6 @@ export default function SignIn() {
           <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
             로그인
           </Button>
-          {/* <Grid container>
-            <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid> */}
         </Box>
       </Box>
       <Copyright sx={{ mt: 8, mb: 4 }} />
