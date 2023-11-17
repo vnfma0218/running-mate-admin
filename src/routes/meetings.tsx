@@ -6,11 +6,11 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { db } from '../firebase'
-import { QueryDocumentSnapshot, collection, getCountFromServer, getDocs, limit, orderBy, query, startAfter } from 'firebase/firestore'
+import { QueryDocumentSnapshot, collection, doc, getCountFromServer, getDocs, limit, orderBy, query, startAfter, updateDoc } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import Meeting from '../models/meeting'
 import { Box, Button, CircularProgress, Divider, Modal, Typography } from '@mui/material'
-import { MEETING_PER_PAGE, StyledTableCell } from '../utils/constants'
+import { MEETING_PER_PAGE, MeetingStatus, StyledTableCell, TypeAlertModal } from '../utils/constants'
 import { ArrowDownward } from '@mui/icons-material'
 import AlertDialog from '../components/global/alertDialog'
 import CustomizedSnackbars from '../components/global/snackbar'
@@ -28,18 +28,26 @@ const style = {
   p: 4,
 }
 
-interface IPageInfo {
+export interface IPageInfo {
   totalCount: number
   curPage: number
   hasMore: boolean
 }
 
+interface IModalProps {
+  detail: boolean
+  deleteConfirm: boolean
+  snackbar: boolean
+  alertType: TypeAlertModal | undefined
+}
+
 export default function MeetingsPage() {
   const [selectedMeet, setSelectedMeet] = useState<Meeting | null>(null)
-  const [detailOpen, setDetailOpen] = useState({
+  const [detailOpen, setDetailOpen] = useState<IModalProps>({
     detail: false,
     deleteConfirm: false,
     snackbar: false,
+    alertType: undefined,
   })
   const [loading, setLoading] = useState(false)
   const [meetings, setMeetings] = useState<Meeting[]>([])
@@ -81,7 +89,7 @@ export default function MeetingsPage() {
       documentSnapshots.forEach((doc) => {
         const data = doc.data()
         const date = new Date(data['createdAt'].toDate())
-        fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date))
+        fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1))
       })
     }
     const totalMeetings = [...meetings, ...fetchedMeets]
@@ -102,7 +110,8 @@ export default function MeetingsPage() {
     setDetailOpen((prev) => ({ ...prev, detail: false }))
   }
   const openDetailModal = (meet: Meeting) => {
-    setDetailOpen((prev) => ({ ...prev, detail: true }))
+    const alertType = meet.status === MeetingStatus.normal ? 'meetingDelete' : 'meetingOpen'
+    setDetailOpen((prev) => ({ ...prev, detail: true, alertType: alertType }))
     setSelectedMeet(meet)
   }
 
@@ -114,10 +123,20 @@ export default function MeetingsPage() {
   }
 
   const onToggleMeetStatus = async () => {
-    // TODO 모임 상태값 변경하기
-    // await setDoc(doc(db, 'cities', selectedMeet!.id), { ...selectedMeet, status: 'stop' })
+    const washingtonRef = doc(db, 'articles', selectedMeet!.id)
+
+    await updateDoc(washingtonRef, {
+      status: selectedMeet?.status === MeetingStatus.normal ? MeetingStatus.stop : MeetingStatus.normal,
+    })
     onDeleteConfirmModalClose()
-    setDetailOpen((prev) => ({ ...prev, snackbar: true }))
+    setMeetings((prev) => {
+      const changedMeet = prev.find((meet) => meet.id === selectedMeet!.id)
+      changedMeet!.status = changedMeet!.status === MeetingStatus.normal ? MeetingStatus.stop : MeetingStatus.normal
+      return prev
+    })
+    const alertType = selectedMeet!.status === MeetingStatus.normal ? 'meetingDelete' : 'meetingOpen'
+
+    setDetailOpen((prev) => ({ ...prev, snackbar: true, alertType: alertType }))
   }
   return (
     <>
@@ -144,7 +163,7 @@ export default function MeetingsPage() {
                       {meet.title}
                     </TableCell>
                     <TableCell>{meet.location}</TableCell>
-                    <TableCell>정상</TableCell>
+                    <TableCell>{meet.status === MeetingStatus.normal ? '정상' : '정지'}</TableCell>
                     <TableCell>{meet.createdAt.toISOString().split('T')[0]}</TableCell>
                   </TableRow>
                 ))}
@@ -169,7 +188,7 @@ export default function MeetingsPage() {
               상세정보
             </Typography>
             <Button onClick={onDeleteConfirmModalShow} variant="contained" color="error" size="small">
-              정지
+              {selectedMeet?.status === MeetingStatus.normal ? '정지' : '정지취소'}
             </Button>
           </Box>
           <Divider sx={{ mt: 1, bgcolor: 'black' }} />
@@ -197,9 +216,9 @@ export default function MeetingsPage() {
           </Box>
         </Box>
       </Modal>
-      <AlertDialog alertType="meetingDelete" open={detailOpen.deleteConfirm} cancelCbFn={onDeleteConfirmModalClose} confirmCbFn={onToggleMeetStatus} />
+      <AlertDialog alertType={detailOpen.alertType ?? 'meetingDelete'} open={detailOpen.deleteConfirm} cancelCbFn={onDeleteConfirmModalClose} confirmCbFn={onToggleMeetStatus} />
       <CustomizedSnackbars
-        alertType="meetingDelete"
+        alertType={detailOpen.alertType ?? 'meetingDelete'}
         open={detailOpen.snackbar}
         handleClose={() => {
           setDetailOpen((prev) => ({ ...prev, snackbar: false }))

@@ -11,14 +11,13 @@ import MenuIcon from '@mui/icons-material/Menu'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import DashboardIcon from '@mui/icons-material/Dashboard'
 import PeopleIcon from '@mui/icons-material/People'
-import BarChartIcon from '@mui/icons-material/BarChart'
 
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { User, onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../../firebase'
-import { LocationCity, LogoutRounded, MeetingRoom, NoMeetingRoom, People } from '@mui/icons-material'
+import { LocationCity, LogoutRounded } from '@mui/icons-material'
 
 interface ISideMenu {
   text: string
@@ -113,7 +112,7 @@ export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [curMenu, setCurMenu] = useState<ISideMenu | null>(null)
-  const [user, setUser] = useState<User | null>(null)
+  const [_, setUser] = useState<User | null>(null)
   const [open, setOpen] = useState(true)
 
   useEffect(() => {
