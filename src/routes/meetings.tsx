@@ -89,6 +89,7 @@ export default function MeetingsPage() {
       documentSnapshots.forEach((doc) => {
         const data = doc.data()
         const date = new Date(data['createdAt'].toDate())
+
         fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1))
       })
     }
@@ -123,9 +124,9 @@ export default function MeetingsPage() {
   }
 
   const onToggleMeetStatus = async () => {
-    const washingtonRef = doc(db, 'articles', selectedMeet!.id)
+    const articleRef = doc(db, 'articles', selectedMeet!.id)
 
-    await updateDoc(washingtonRef, {
+    await updateDoc(articleRef, {
       status: selectedMeet?.status === MeetingStatus.normal ? MeetingStatus.stop : MeetingStatus.normal,
     })
     onDeleteConfirmModalClose()

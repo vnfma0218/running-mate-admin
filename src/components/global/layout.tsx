@@ -53,8 +53,8 @@ const SIDE_MENUS: ISideMenu[] = [
     text: '공지관리',
     icon: () => <PeopleIcon />,
     path: '/notice',
-    title: () => <Typography sx={{ mt: 2 }}>회원관리</Typography>,
-    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 회원을 관리합니다.</Typography>,
+    title: () => <Typography sx={{ mt: 2 }}>공지관리</Typography>,
+    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 공지사항을 관리합니다.</Typography>,
   },
 ]
 

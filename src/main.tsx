@@ -12,6 +12,7 @@ import UsersPage from './routes/users'
 import HomePage from './routes/home'
 import NotiePage from './routes/notice'
 import MeetingsPage from './routes/meetings'
+import NewNoticePage from './routes/newNotice'
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
       { path: '/users', element: <UsersPage /> },
       { path: '/meetings', element: <MeetingsPage /> },
       { path: '/notice', element: <NotiePage /> },
+      { path: '/new-notice', element: <NewNoticePage /> },
     ],
   },
 ])

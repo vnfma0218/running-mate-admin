@@ -1,3 +1,4 @@
+import { plainToClass } from 'class-transformer'
 import { MeetingStatus } from '../utils/constants'
 
 class Meeting {
@@ -15,6 +16,9 @@ class Meeting {
     this.location = location
     this.createdAt = createdAt
     this.status = status
+  }
+  static fromJson(jsonData: Object) {
+    return plainToClass(Meeting, jsonData)
   }
 }
 

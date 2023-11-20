@@ -7,14 +7,26 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { ChangeEvent, useEffect, useState } from 'react'
 import { db } from '../firebase'
-import { OrderByDirection, QueryDocumentSnapshot, collection, getCountFromServer, getDocs, limit, orderBy, query, startAfter, where } from 'firebase/firestore'
+import { OrderByDirection, QueryDocumentSnapshot, collection, doc, getCountFromServer, getDocs, limit, orderBy, query, startAfter, updateDoc, where } from 'firebase/firestore'
 import User from '../models/user'
-import { StyledTableCell, USERS_PER_PAGE } from '../utils/constants'
+import { StyledTableCell, TypeAlertModal, USERS_PER_PAGE, UserStatus } from '../utils/constants'
 import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
 import { IPageInfo } from './meetings'
 import { ArrowDownward } from '@mui/icons-material'
+import AlertDialog from '../components/global/alertDialog'
+import CustomizedSnackbars from '../components/global/snackbar'
+
+export interface IModalInfo {
+  alertOpen: boolean
+  alertType: TypeAlertModal
+  snackbarOpen: boolean
+}
 
 export default function UsersPage() {
+  const [users, setUsers] = useState<User[]>([])
+  const [selectedUser, setSelectedUser] = useState<User>()
+  const [loading, setLoading] = useState(false)
+
   const [searchParams, setSearchParams] = useState({
     input: '',
     sort: 'desc',
@@ -23,14 +35,19 @@ export default function UsersPage() {
     input: '',
     sort: 'desc',
   })
-  const [loading, setLoading] = useState(false)
-  const [users, setUsers] = useState<User[]>([])
+
   const [pageInfo, setPageInfo] = useState<IPageInfo>({
     totalCount: 0,
     curPage: 1,
     hasMore: false,
   })
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null)
+
+  const [modalInfo, setModalInfo] = useState<IModalInfo>({
+    alertOpen: false,
+    alertType: 'userDelete',
+    snackbarOpen: false,
+  })
 
   useEffect(() => {
     fetchUsers()
@@ -56,7 +73,7 @@ export default function UsersPage() {
       documentSnapshots.forEach((doc) => {
         const data = doc.data()
         const createdAt = new Date(data['createdAt'].toDate())
-        const user = new User(doc.id, data['name'], data['email'], data['imageUrl'], createdAt)
+        const user = new User(doc.id, data['name'], data['email'], data['imageUrl'], createdAt, data['status'] ?? UserStatus.normal)
         fetchedUsers.push(user)
       })
     }
@@ -107,6 +124,31 @@ export default function UsersPage() {
     setPageInfo((prev) => ({ ...prev, curPage: 1 }))
   }
 
+  const onDeleteConfirmModalClose = () => {
+    setModalInfo((prev) => ({ ...prev, alertOpen: false }))
+  }
+
+  const onDeleteConfirmModalShow = (selectedUser: User) => {
+    setSelectedUser(selectedUser)
+    setModalInfo((prev) => ({ ...prev, alertOpen: true, alertType: selectedUser.status === UserStatus.normal ? 'userDelete' : 'userOpen' }))
+  }
+
+  const onToggleUserStatus = async () => {
+    const userRef = doc(db, 'users', selectedUser!.id)
+
+    await updateDoc(userRef, {
+      status: selectedUser?.status === UserStatus.normal ? UserStatus.stop : UserStatus.normal,
+    })
+    setUsers((prev) => {
+      const changedUser = prev.find((user) => user.id === user!.id)
+      changedUser!.status = changedUser!.status === UserStatus.normal ? UserStatus.stop : UserStatus.normal
+      return prev
+    })
+    const alertType = selectedUser!.status === UserStatus.normal ? 'meetingDelete' : 'meetingOpen'
+
+    setModalInfo(() => ({ alertOpen: false, alertType: alertType, snackbarOpen: true }))
+  }
+
   return (
     <>
       <Box sx={{ mb: 2, padding: '1rem', border: '1px solid #ebebeb' }}>
@@ -137,10 +179,11 @@ export default function UsersPage() {
               <TableRow>
                 <StyledTableCell>닉네임</StyledTableCell>
                 <StyledTableCell>이메일</StyledTableCell>
+                <StyledTableCell>가입일</StyledTableCell>
+                <StyledTableCell>상태</StyledTableCell>
                 <StyledTableCell align="left">
                   <Typography sx={{ paddingLeft: '5px' }}> 관리</Typography>
                 </StyledTableCell>
-                <StyledTableCell>가입일</StyledTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -150,12 +193,13 @@ export default function UsersPage() {
                     {user.name}
                   </TableCell>
                   <TableCell sx={{ width: '250px' }}>{user.email}</TableCell>
+                  <TableCell>{user.createdAt.toISOString().split('T')[0]}</TableCell>
+                  <TableCell>{user.status === UserStatus.normal ? '정상' : '정지'}</TableCell>
                   <TableCell>
-                    <Button size="small" variant="contained" color="error">
-                      정지
+                    <Button onClick={() => onDeleteConfirmModalShow(user)} size="small" variant="contained" color="error">
+                      {user.status === UserStatus.normal ? '정지' : '정지해제'}
                     </Button>
                   </TableCell>
-                  <TableCell>{user.createdAt.toISOString().split('T')[0]}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -171,6 +215,14 @@ export default function UsersPage() {
           </Button>
         </Box>
       ) : null}
+      <AlertDialog alertType={modalInfo.alertType} open={modalInfo.alertOpen} cancelCbFn={onDeleteConfirmModalClose} confirmCbFn={onToggleUserStatus} />
+      <CustomizedSnackbars
+        alertType={modalInfo.alertType}
+        open={modalInfo.snackbarOpen}
+        handleClose={() => {
+          setModalInfo((prev) => ({ ...prev, snarbarOpen: false }))
+        }}
+      />
     </>
   )
 }
