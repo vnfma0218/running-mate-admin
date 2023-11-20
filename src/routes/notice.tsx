@@ -71,7 +71,10 @@ export default function NotiePage() {
   }, [])
 
   const newNoticePage = () => {
-    navigate('/new-notice')
+    navigate('/noticeDetail/new')
+  }
+  const noticeDetailPage = (id: string) => {
+    navigate(`/noticeDetail/${id}`)
   }
   return (
     <Fragment>
@@ -112,12 +115,12 @@ export default function NotiePage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {notices.map((user) => (
-                  <TableRow key={user.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                {notices.map((notice) => (
+                  <TableRow onClick={() => noticeDetailPage(notice.id)} hover key={notice.id} sx={{ '&:last-child td, &:last-child th': { border: 0 }, cursor: 'pointer' }}>
                     <TableCell sx={{ width: '200px' }} component="th" scope="row">
-                      {user.title}
+                      {notice.title}
                     </TableCell>
-                    <TableCell>{user.createdAt.toISOString().split('T')[0]}</TableCell>
+                    <TableCell>{notice.createdAt.toISOString().split('T')[0]}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

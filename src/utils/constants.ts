@@ -10,7 +10,7 @@ export const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }))
 
-export type TypeAlertModal = 'meetingDelete' | 'meetingOpen' | 'userDelete' | 'userOpen' | 'newNotice'
+export type TypeAlertModal = 'meetingDelete' | 'meetingOpen' | 'userDelete' | 'userOpen' | 'newNotice' | 'updateNotice' | 'deleteNotice'
 export type TypeSnackbar = 'delete' | 'userDelete'
 
 type IAlertModalMessages = {
@@ -52,8 +52,16 @@ export const ALERT_MODAL_MESSAGES: IAlertModalMessages = {
     content: '해당 유저를 정지를 해제합니다. 진행하시곘습니까?',
   },
   newNotice: {
-    title: '공지등록',
+    title: '공지 등록',
     content: '공지를 등록합니다. 진행하시곘습니까?',
+  },
+  updateNotice: {
+    title: '공지 수정',
+    content: '공지를 수정합니다. 진행하시곘습니까?',
+  },
+  deleteNotice: {
+    title: '공지 삭제',
+    content: '공지를 삭제합니다. 진행하시곘습니까?',
   },
 }
 export const SNACKBARS_MESSAGES: ISnackbarsMessages = {
@@ -71,5 +79,11 @@ export const SNACKBARS_MESSAGES: ISnackbarsMessages = {
   },
   newNotice: {
     title: '공지 사항을 등록하였습니다.',
+  },
+  updateNotice: {
+    title: '공지 사항을 수정하였습니다.',
+  },
+  deleteNotice: {
+    title: '공지를 삭제하였습니다.',
   },
 }
