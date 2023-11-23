@@ -14,6 +14,7 @@ import { MEETING_PER_PAGE, MeetingStatus, StyledTableCell, TypeAlertModal } from
 import { ArrowDownward } from '@mui/icons-material'
 import AlertDialog from '../components/global/alertDialog'
 import CustomizedSnackbars from '../components/global/snackbar'
+import { PieChart } from '@mui/x-charts'
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -90,7 +91,7 @@ export default function MeetingsPage() {
         const data = doc.data()
         const date = new Date(data['createdAt'].toDate())
 
-        fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1))
+        fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1, data['report']))
       })
     }
     const totalMeetings = [...meetings, ...fetchedMeets]
@@ -209,6 +210,26 @@ export default function MeetingsPage() {
               {selectedMeet?.desc}
             </Typography>
           </Box>
+          <Divider sx={{ mt: 1, bgcolor: 'black' }} />
+          <Typography variant="body1" id="modal-modal-description" sx={{ mt: 2, fontWeight: 'bold' }}>
+            신고내역
+          </Typography>
+          {selectedMeet?.report ? (
+            <PieChart
+              series={[
+                {
+                  data: [
+                    { id: 0, value: selectedMeet.report.sexualContent, label: '성적 콘텐츠' },
+                    { id: 1, value: selectedMeet.report.abuseContent, label: '욕설 콘텐츠' },
+                    { id: 3, value: selectedMeet.report.marketingContent, label: '홍보 콘텐츠' },
+                    { id: 4, value: selectedMeet.report.etc, label: '기타 부적절 콘텐츠' },
+                  ],
+                },
+              ]}
+              width={500}
+              height={200}
+            />
+          ) : null}
 
           <Box sx={{ display: 'flex', justifyContent: 'end', mt: 4 }}>
             <Button onClick={onCloseModel} variant="contained" size="small">

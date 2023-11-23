@@ -6,7 +6,7 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { MEETING_PER_PAGE, StyledTableCell } from '../utils/constants'
 
-import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TableCell, TextField, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, TableCell, TextField } from '@mui/material'
 import { Fragment, useEffect, useState } from 'react'
 import { IPageInfo } from './meetings'
 import { useNavigate } from 'react-router-dom'
