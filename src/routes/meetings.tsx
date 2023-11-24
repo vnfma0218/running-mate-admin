@@ -184,7 +184,7 @@ export default function MeetingsPage() {
       )}
 
       <Modal open={detailOpen.detail} onClose={onCloseModel} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-        <Box sx={{ ...modalStyle, overflowY: 'scroll' }}>
+        <Box sx={{ ...modalStyle, overflowY: 'scroll', minHeight: selectedMeet?.report ? '550px' : null }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography id="modal-modal-title" variant="h6" component="h2">
               상세정보

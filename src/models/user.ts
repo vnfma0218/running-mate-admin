@@ -1,3 +1,4 @@
+import { plainToClass } from 'class-transformer'
 import { UserStatus } from '../utils/constants'
 
 class User {
@@ -15,6 +16,9 @@ class User {
     this.imageUrl = imageUrl
     this.createdAt = createdAt
     this.status = status
+  }
+  static fromJson(jsonData: Object) {
+    return plainToClass(User, jsonData)
   }
 }
 

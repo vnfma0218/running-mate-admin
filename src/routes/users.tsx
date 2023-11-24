@@ -15,6 +15,7 @@ import { IPageInfo } from './meetings'
 import { ArrowDownward } from '@mui/icons-material'
 import AlertDialog from '../components/global/alertDialog'
 import CustomizedSnackbars from '../components/global/snackbar'
+import useModalInfo from '../hooks/useModal'
 
 export interface IModalInfo {
   alertOpen: boolean
@@ -26,6 +27,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [selectedUser, setSelectedUser] = useState<User>()
   const [loading, setLoading] = useState(false)
+  const { modalInfo, openAlert, closeAlert, openSnackbar, closeSnackbar } = useModalInfo({ alertType: 'userDelete' })
 
   const [searchParams, setSearchParams] = useState({
     input: '',
@@ -43,12 +45,6 @@ export default function UsersPage() {
   })
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot | null>(null)
 
-  const [modalInfo, setModalInfo] = useState<IModalInfo>({
-    alertOpen: false,
-    alertType: 'userDelete',
-    snackbarOpen: false,
-  })
-
   useEffect(() => {
     fetchUsers()
   }, [pageInfo.curPage, savedSearchParams])
@@ -59,11 +55,9 @@ export default function UsersPage() {
     const { doc, totalCountDoc } = queryMethod()
     let totalCnt = 0
     if (pageInfo.curPage === 1) {
-      console.log('pageInfo.curPage', pageInfo.curPage)
       const snapshot = await getCountFromServer(totalCountDoc)
       totalCnt = snapshot.data().count
     } else {
-      console.log('pageInfo.curPage', pageInfo.totalCount)
       totalCnt = pageInfo.totalCount ?? 0
     }
     const documentSnapshots = await getDocs(doc)
@@ -125,28 +119,27 @@ export default function UsersPage() {
   }
 
   const onDeleteConfirmModalClose = () => {
-    setModalInfo((prev) => ({ ...prev, alertOpen: false }))
+    closeAlert()
   }
 
   const onDeleteConfirmModalShow = (selectedUser: User) => {
     setSelectedUser(selectedUser)
-    setModalInfo((prev) => ({ ...prev, alertOpen: true, alertType: selectedUser.status === UserStatus.normal ? 'userDelete' : 'userOpen' }))
+    openAlert(selectedUser.status === UserStatus.normal ? 'userDelete' : 'userOpen')
   }
 
   const onToggleUserStatus = async () => {
     const userRef = doc(db, 'users', selectedUser!.id)
-
+    const changedStatus = selectedUser?.status === UserStatus.normal ? UserStatus.stop : UserStatus.normal
     await updateDoc(userRef, {
-      status: selectedUser?.status === UserStatus.normal ? UserStatus.stop : UserStatus.normal,
+      status: changedStatus,
     })
     setUsers((prev) => {
-      const changedUser = prev.find((user) => user.id === user!.id)
-      changedUser!.status = changedUser!.status === UserStatus.normal ? UserStatus.stop : UserStatus.normal
+      const changedUser = prev.find((user) => user.id === selectedUser!.id)
+      changedUser!.status = changedStatus
       return prev
     })
-    const alertType = selectedUser!.status === UserStatus.normal ? 'meetingDelete' : 'meetingOpen'
-
-    setModalInfo(() => ({ alertOpen: false, alertType: alertType, snackbarOpen: true }))
+    closeAlert()
+    openSnackbar()
   }
 
   return (
@@ -220,7 +213,8 @@ export default function UsersPage() {
         alertType={modalInfo.alertType}
         open={modalInfo.snackbarOpen}
         handleClose={() => {
-          setModalInfo((prev) => ({ ...prev, snarbarOpen: false }))
+          closeSnackbar()
+          // setModalInfo((prev) => ({ ...prev, snarbarOpen: false }))
         }}
       />
     </>
