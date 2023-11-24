@@ -37,7 +37,7 @@ export default function NotiePage() {
         totalCnt = snapshot.data().count
         setPageInfo((prev) => ({ ...prev, totalCount: snapshot.data().count, curPage: prev.curPage + 1 }))
       } else {
-        totalCnt = pageInfo.totalCount
+        totalCnt = pageInfo.totalCount ?? 0
       }
       let doc
       if (lastDoc) {

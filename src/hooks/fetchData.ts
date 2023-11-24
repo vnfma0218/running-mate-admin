@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { IPageInfo } from '../routes/meetings'
 import { QueryDocumentSnapshot, collection, getCountFromServer, getDocs, limit, orderBy, query, startAfter } from 'firebase/firestore'
 import { db } from '../firebase'
-import { plainToClass } from 'class-transformer'
 
 interface IFetchInfo {
   collNm: string
@@ -30,7 +29,7 @@ function useFetchData<T>({ collNm, perPage }: IFetchInfo) {
         totalCnt = snapshot.data().count
         setPageInfo((prev) => ({ ...prev, totalCount: snapshot.data().count, curPage: prev.curPage + 1 }))
       } else {
-        totalCnt = pageInfo.totalCount
+        totalCnt = pageInfo.totalCount ?? 0
       }
 
       let doc

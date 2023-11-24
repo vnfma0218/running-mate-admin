@@ -16,7 +16,7 @@ import AlertDialog from '../components/global/alertDialog'
 import CustomizedSnackbars from '../components/global/snackbar'
 import { PieChart } from '@mui/x-charts'
 
-const style = {
+export const modalStyle = {
   position: 'absolute' as 'absolute',
   top: '50%',
   left: '50%',
@@ -30,7 +30,7 @@ const style = {
 }
 
 export interface IPageInfo {
-  totalCount: number
+  totalCount?: number
   curPage: number
   hasMore: boolean
 }
@@ -73,7 +73,7 @@ export default function MeetingsPage() {
       totalCnt = snapshot.data().count
       setPageInfo((prev) => ({ ...prev, totalCount: snapshot.data().count, curPage: prev.curPage + 1 }))
     } else {
-      totalCnt = pageInfo.totalCount
+      totalCnt = pageInfo.totalCount ?? 0
     }
 
     let doc
@@ -184,7 +184,7 @@ export default function MeetingsPage() {
       )}
 
       <Modal open={detailOpen.detail} onClose={onCloseModel} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
-        <Box sx={{ ...style, overflowY: 'scroll' }}>
+        <Box sx={{ ...modalStyle, overflowY: 'scroll' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography id="modal-modal-title" variant="h6" component="h2">
               상세정보

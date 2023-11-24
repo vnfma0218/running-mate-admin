@@ -11,13 +11,14 @@ interface ISnackbarProps {
   alertType: TypeAlertModal
   open: boolean
   handleClose: () => void
+  message?: string
 }
 
-export default function CustomizedSnackbars({ alertType, open, handleClose }: ISnackbarProps) {
+export default function CustomizedSnackbars({ alertType, open, handleClose, message }: ISnackbarProps) {
   return (
     <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
       <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
-        {SNACKBARS_MESSAGES[alertType].title}
+        {message ? message : SNACKBARS_MESSAGES[alertType].title}
       </Alert>
     </Snackbar>
   )

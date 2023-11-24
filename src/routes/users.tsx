@@ -64,7 +64,7 @@ export default function UsersPage() {
       totalCnt = snapshot.data().count
     } else {
       console.log('pageInfo.curPage', pageInfo.totalCount)
-      totalCnt = pageInfo.totalCount
+      totalCnt = pageInfo.totalCount ?? 0
     }
     const documentSnapshots = await getDocs(doc)
     const fetchedUsers = [] as User[]

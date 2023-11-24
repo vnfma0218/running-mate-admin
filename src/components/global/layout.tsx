@@ -17,7 +17,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { User, onAuthStateChanged, signOut } from 'firebase/auth'
 import { auth } from '../../firebase'
-import { LocationCity, LogoutRounded } from '@mui/icons-material'
+import { LocationCity, LogoutRounded, QuestionAnswer } from '@mui/icons-material'
 import { SnackbarProvider } from '../../utils/context/snackbar'
 
 interface ISideMenu {
@@ -56,6 +56,13 @@ const SIDE_MENUS: ISideMenu[] = [
     path: '/notice',
     title: () => <Typography sx={{ mt: 2 }}>공지관리</Typography>,
     desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 공지사항을 관리합니다.</Typography>,
+  },
+  {
+    text: '문의관리',
+    icon: () => <QuestionAnswer />,
+    path: '/inquiries',
+    title: () => <Typography sx={{ mt: 2 }}>문의관리</Typography>,
+    desc: () => <Typography sx={{ mt: 1, mb: 3, fontSize: '14px' }}>러닝메이트의 1:1문의를 관리합니다.</Typography>,
   },
 ]
 
