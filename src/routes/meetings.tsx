@@ -6,7 +6,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import { db } from '../firebase'
-import { QueryDocumentSnapshot, collection, doc, getCountFromServer, getDocs, limit, orderBy, query, startAfter, updateDoc } from 'firebase/firestore'
+import { QueryDocumentSnapshot, collection, doc, getCountFromServer, getDoc, getDocs, limit, orderBy, query, startAfter, updateDoc, where } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import Meeting from '../models/meeting'
 import { Box, Button, CircularProgress, Divider, Modal, Typography } from '@mui/material'
@@ -15,6 +15,7 @@ import { ArrowDownward } from '@mui/icons-material'
 import AlertDialog from '../components/global/alertDialog'
 import CustomizedSnackbars from '../components/global/snackbar'
 import { PieChart } from '@mui/x-charts'
+import Report from '../models/report'
 
 export const modalStyle = {
   position: 'absolute' as 'absolute',
@@ -63,6 +64,24 @@ export default function MeetingsPage() {
     fetchMeetings()
   }, [])
 
+  const getReportById = async (meetId: string) => {
+    const q = query(collection(db, 'reports'), where('articleId', '==', meetId))
+
+    const docSnap = await getDocs(q)
+    let report
+    if (docSnap.empty) {
+      return undefined
+    }
+    docSnap.forEach((doc) => {
+      const data = doc.data()
+      const date = new Date(data['createdAt'].toDate())
+      console.log('hello')
+      report = Report.fromJson({ ...data, ['id']: doc.id, ['createdAt']: date, ['articleId']: meetId })
+    })
+
+    return report
+  }
+
   const fetchMeetings = async () => {
     setLoading(true)
 
@@ -85,15 +104,16 @@ export default function MeetingsPage() {
 
     const documentSnapshots = await getDocs(doc)
     const fetchedMeets: Meeting[] = []
-
     if (!documentSnapshots.empty) {
-      documentSnapshots.forEach((doc) => {
-        const data = doc.data()
+      for (var i in documentSnapshots.docs) {
+        const data = documentSnapshots.docs[i].data()
         const date = new Date(data['createdAt'].toDate())
-
-        fetchedMeets.push(new Meeting(doc.id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1, data['report']))
-      })
+        const report = await getReportById(documentSnapshots.docs[i].id)
+        console.log('report', report)
+        fetchedMeets.push(new Meeting(documentSnapshots.docs[i].id, data['title'], data['desc'], data['location']['formattedAddress'], date, data['status'] ?? 1, report))
+      }
     }
+
     const totalMeetings = [...meetings, ...fetchedMeets]
 
     setMeetings(totalMeetings)
@@ -115,6 +135,7 @@ export default function MeetingsPage() {
     const alertType = meet.status === MeetingStatus.normal ? 'meetingDelete' : 'meetingOpen'
     setDetailOpen((prev) => ({ ...prev, detail: true, alertType: alertType }))
     setSelectedMeet(meet)
+    console.log('meet', meet)
   }
 
   const onDeleteConfirmModalShow = () => {
@@ -219,10 +240,10 @@ export default function MeetingsPage() {
               series={[
                 {
                   data: [
-                    { id: 0, value: selectedMeet.report.sexualContent, label: '성적 콘텐츠' },
-                    { id: 1, value: selectedMeet.report.abuseContent, label: '욕설 콘텐츠' },
-                    { id: 3, value: selectedMeet.report.marketingContent, label: '홍보 콘텐츠' },
-                    { id: 4, value: selectedMeet.report.etc, label: '기타 부적절 콘텐츠' },
+                    { id: 0, value: selectedMeet.report.count.sexualContent, label: '성적 콘텐츠' },
+                    { id: 1, value: selectedMeet.report.count.abuseContent, label: '욕설 콘텐츠' },
+                    { id: 3, value: selectedMeet.report.count.marketingContent, label: '홍보 콘텐츠' },
+                    { id: 4, value: selectedMeet.report.count.etc, label: '기타 부적절 콘텐츠' },
                   ],
                 },
               ]}

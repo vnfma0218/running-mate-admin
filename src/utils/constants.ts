@@ -11,6 +11,7 @@ export const StyledTableCell = styled(TableCell)(({ theme }) => ({
 }))
 
 export type TypeAlertModal = 'meetingDelete' | 'meetingOpen' | 'userDelete' | 'userOpen' | 'newNotice' | 'updateNotice' | 'deleteNotice' | 'saveReply'
+
 export type TypeSnackbar = 'delete' | 'userDelete'
 
 type IAlertModalMessages = {

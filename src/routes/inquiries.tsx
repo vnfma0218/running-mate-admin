@@ -13,6 +13,7 @@ import User from '../models/user'
 import UserDetailModal from '../components/inquiry/UserDetailModal'
 
 export const clickableRowStyle = {
+  display: 'inline-block',
   color: 'rgb(0, 127, 255)',
   textDecoration: 'underline',
 }
@@ -83,7 +84,7 @@ export default function InquiriesPage() {
     updateCurInquiryList(updatedInquiryItem)
   }
 
-  const selectUser = (e: React.MouseEvent<HTMLTableCellElement, MouseEvent>, user: User) => {
+  const selectUser = (e: React.MouseEvent<HTMLSpanElement, MouseEvent>, user: User) => {
     e.stopPropagation()
     setSelectedUser(user)
     userOpenModal()
@@ -113,8 +114,10 @@ export default function InquiriesPage() {
                     <TableCell sx={{ width: '200px' }} component="th" scope="row">
                       {inquiry.title}
                     </TableCell>
-                    <TableCell onClick={(e) => selectUser(e, inquiry.user)}>
-                      <Typography style={{ ...clickableRowStyle }}>{inquiry.user.name}</Typography>
+                    <TableCell>
+                      <Typography onClick={(e) => selectUser(e, inquiry.user)} style={{ ...clickableRowStyle }}>
+                        {inquiry.user.name}
+                      </Typography>
                     </TableCell>
                     <TableCell>{inquiry.createdAt.toISOString().split('T')[0]}</TableCell>
 
@@ -186,8 +189,9 @@ export default function InquiriesPage() {
                 답변
               </Typography>
             </Box>
-            {isReplying && !selectedInquiry?.reply && (
+            {isReplying && (
               <TextField
+                value={replyString}
                 sx={{ mt: 1 }}
                 onChange={(e) => {
                   setReplyString(e.target.value)
@@ -217,7 +221,18 @@ export default function InquiriesPage() {
             </Typography>
             {!selectedInquiry?.reply?.isSaved && selectedInquiry?.reply ? (
               <Box sx={{ display: 'flex', justifyContent: 'end' }}>
-                <Button>답변수정</Button>
+                <Button
+                  onClick={() => {
+                    if (!isReplying) {
+                      setReplyString(selectedInquiry.reply?.content!)
+                      onChnageReplyMode()
+                    } else {
+                      onSaveReplyContent()
+                    }
+                  }}
+                >
+                  {isReplying ? '수정 완료' : '답변 수정'}
+                </Button>
               </Box>
             ) : null}
           </Box>
