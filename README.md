@@ -1,27 +1,26 @@
-# React + TypeScript + Vite
+## 러닝메이트 관리자 페이지
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+러닝메이트 어플을 관리하는 페이지
 
-Currently, two official plugins are available:
+## 소개
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+파이어베이스, 리액트 라이브러리를 사용하여 러닝메이트 어플에서 생성되는 데이터 등을 관리할 수 있는 웹 어플리케이션
 
-## Expanding the ESLint configuration
+## 개발기간
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- 23.11.15 ~ 23.12.05
 
-- Configure the top-level `parserOptions` property like this:
 
-```js
-   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-   },
-```
+## 주요기능
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+- 차트라이브러리 사용하여 회원가입 현황, 게시글 신고현황 확인
+- 모임 게시글 개별 신고 현황 확인 및 게시글 정지 
+- text editor 활용하여 공지사항 작성 및 게시
+- 유저 문의 확인 및 답변 작성 
+
+
+## 배포 url 및 계정 정보
+
+- 배포된 web url : <a href="https://running-mate-c7ed4.web.app/" target="_blank">click here</a>
+- 아이디: admin@gmail.com
+- 비밀번호: 123456 
